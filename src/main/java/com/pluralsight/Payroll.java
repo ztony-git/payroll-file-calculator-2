@@ -27,6 +27,8 @@ public class Payroll {
             System.out.print("Enter the name of the payroll file to create: ");
             String fileWrite = scanner.nextLine();
 
+            boolean isJson = fileWrite.endsWith(".json");
+
             // FileReader opens the file; BufferedReader wraps it so we can read whole lines
             BufferedReader reader = new BufferedReader(new FileReader(fileRead));
             BufferedWriter writer = new BufferedWriter(new FileWriter(fileWrite));
@@ -35,6 +37,12 @@ public class Payroll {
 
             // Skip the header line: "id" is not a number and parseInt would fail on it
             reader.readLine();
+
+            if (isJson) {
+                writer.write("[\n");
+            }
+
+            int count = 0;
 
             // readLine() returns null at the end of the file, which ends the loop
             while ((line = reader.readLine()) != null) {
@@ -48,7 +56,16 @@ public class Payroll {
 
                 Employee employee = new Employee(id, name, hoursWorked, payRate);
 
-                writer.write(employee.getEmployeeId() + "|" + employee.getName() + "|" + employee.getGrossPay() + "\n");
+                if(!isJson) {
+                    writer.write(employee.getEmployeeId() + "|" + employee.getName() + "|" + employee.getGrossPay() + "\n");
+                } else {
+                    writer.write((count++ == 0 ? "" : ",\n") + "\t{ \"id\": " + employee.getEmployeeId() + ", \"name\": \"" + employee.getName() + "\", \"grossPay\": " + employee.getGrossPay() + " }");
+
+                }
+            }
+
+            if (isJson) {
+                writer.write("\n]");
             }
             reader.close();
             writer.close();
